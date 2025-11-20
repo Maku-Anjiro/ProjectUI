@@ -1,53 +1,90 @@
 package com.example.uidesign;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
+import com.bumptech.glide.Glide;
+import com.example.uidesign.network.APIBuilder;
+import com.example.uidesign.network.callbacks.APICallbacks;
+import com.example.uidesign.network.endpoints.GenerateQRCode;
+import com.example.uidesign.network.models.RegisterModels;
+import com.example.uidesign.network.repository.UserAPIHandler;
+import com.example.uidesign.network.response.APIResponse;
+import com.example.uidesign.network.response.QrUrlResponse;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class SignUpActivity extends AppCompatActivity {
 
-    // Firebase
-    private FirebaseAuth auth;
 
     // Fields
-    private EditText inputFullName, inputEmail, inputPhone, inputHost;
+    private EditText inputFullName, inputEmail, inputPhone, inputHost, inputNotes;
+    private ImageView qrCodeImage;
+    private LinearLayout qrSection;
+
+    private TextView tvQRCodeID, tvName, tvExpiresAt, tvEmail, tvPhone, tvPurpose, tvHost, tvNotes;
     private Spinner spinnerPurpose;
-    private Button signupButton;
-    private TextView loginRedirectText;
+
+    private Button btnGenerateQR, btnClear;
+    private Context context;
+    private Activity activity;
+    private UserAPIHandler apiHandler;
+    private APIBuilder apiBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        auth = FirebaseAuth.getInstance();
-
+        activity = this;
+        context = this;
         // ==== FIND UI COMPONENTS ====
         inputFullName = findViewById(R.id.inputFullName);
         inputEmail = findViewById(R.id.inputEmail);
         inputPhone = findViewById(R.id.inputPhone);
         inputHost = findViewById(R.id.inputHost);
+        inputNotes = findViewById(R.id.inputNotes);
         spinnerPurpose = findViewById(R.id.spinnerPurpose);
-        signupButton = findViewById(R.id.btnSignUp);
-        loginRedirectText = findViewById(R.id.loginRedirectText);
+        btnGenerateQR = findViewById(R.id.btnGenerateQR);
+        apiHandler = new UserAPIHandler(activity, context);
+
+        qrSection = findViewById(R.id.qrSection);
+        qrCodeImage = findViewById(R.id.qrCodeImage);
+        tvQRCodeID = findViewById(R.id.tvQRCodeID);
+        tvName = findViewById(R.id.tvName);
+        tvEmail = findViewById(R.id.tvEmail);
+        tvPhone = findViewById(R.id.tvPhone);
+        tvPurpose = findViewById(R.id.tvPurpose);
+        tvHost = findViewById(R.id.tvHost);
+        tvNotes = findViewById(R.id.tvNotes);
+        btnClear = findViewById(R.id.btnClear);
+        tvExpiresAt = findViewById(R.id.tvExpiresAt);
 
         // ==== SPINNER LIST ====
         List<String> purposeList = new ArrayList<>();
@@ -57,6 +94,7 @@ public class SignUpActivity extends AppCompatActivity {
         purposeList.add("Appointment");
         purposeList.add("Walk-in");
         purposeList.add("Others");
+        apiBuilder = new APIBuilder(context);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
@@ -67,8 +105,8 @@ public class SignUpActivity extends AppCompatActivity {
         spinnerPurpose.setAdapter(adapter);
         spinnerPurpose.setSelection(0);
 
-        // ==== SIGN UP BUTTON CLICK ====
-        signupButton.setOnClickListener(new View.OnClickListener() {
+
+        btnGenerateQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -77,6 +115,7 @@ public class SignUpActivity extends AppCompatActivity {
                 String phone = inputPhone.getText().toString().trim();
                 String purpose = spinnerPurpose.getSelectedItem().toString();
                 String host = inputHost.getText().toString().trim();
+                String notes = inputHost.getText().toString().trim();
 
                 // ==== VALIDATION ====
                 if (fullName.isEmpty()) {
@@ -113,40 +152,69 @@ public class SignUpActivity extends AppCompatActivity {
                     inputHost.setError("Host person required");
                     return;
                 }
-
-                // ==== TEMP PASSWORD FOR FIREBASE ====
-                String tempPassword = "visitor123";
-
-                auth.createUserWithEmailAndPassword(email, tempPassword)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                RegisterModels userModel = new RegisterModels(fullName,
+                        email,
+                        phone,
+                        purpose,
+                        host,
+                        notes);
+                apiHandler.registerUser(userModel, new APICallbacks<APIResponse>() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onSuccess(APIResponse response) {
+                        apiHandler.getQrImage(response.getQr_Code(), new APICallbacks<byte[]>() {
                             @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
+                            public void onSuccess(byte[] response1) {
 
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(SignUpActivity.this,
-                                            "Registration Successful",
-                                            Toast.LENGTH_SHORT).show();
+                                String utcString = "2025-11-21T07:03:00.860336+00:00";
 
-                                    startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                                    finish();
+                                // Parse UTC string
+                                OffsetDateTime utcDateTime = OffsetDateTime.parse(utcString);
 
-                                } else {
-                                    Toast.makeText(SignUpActivity.this,
-                                            "Signup Failed: " + task.getException().getMessage(),
-                                            Toast.LENGTH_LONG).show();
-                                }
+                                // Convert to Philippine Time (UTC+8)
+                                ZoneId philippineZone = ZoneId.of("Asia/Manila");
+                                var phTime = utcDateTime.atZoneSameInstant(philippineZone);
+
+                                // Format output
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+                                String formatted = phTime.format(formatter);
+
+                                btnClear.setVisibility(View.VISIBLE);
+                                //set text for expiration with formatted date and time
+                                tvExpiresAt.setText(formatted);
+                                tvQRCodeID.setText(response.getQr_Code());
+                                tvName.setText(response.getVisitor_name());
+                                tvEmail.setText(response.getEmail());
+                                tvPhone.setText(response.getPhone());
+                                tvPurpose.setText(response.getPurpose());
+                                tvHost.setText(response.getHost());
+                                tvNotes.setText(response.getNotes());
+
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(response1, 0, response1.length);
+                                runOnUiThread(() -> {
+                                    ImageView qrImageView = findViewById(R.id.qrCodeImage);
+                                    qrImageView.setImageBitmap(bitmap);
+                                });
+
+                                //then set visibility for qr section
+                                qrSection.setVisibility(View.VISIBLE);
+
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
 
                             }
                         });
-            }
-        });
 
-        // ==== LOGIN REDIRECT ====
-        loginRedirectText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                finish();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

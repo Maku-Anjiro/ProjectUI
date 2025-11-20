@@ -43,4 +43,14 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    //For api handling
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")  //  3.0.0 doesn't exist
+    //for converting the response as json
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    //for websocket
+    implementation("org.java-websocket:Java-WebSocket:1.5.2")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    //Glide
+    implementation("com.github.bumptech.glide:glide:5.0.5")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 }

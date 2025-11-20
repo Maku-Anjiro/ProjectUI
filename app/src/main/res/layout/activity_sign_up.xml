@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
@@ -74,32 +75,172 @@
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="28dp" />
 
-        <!-- Register Button -->
-        <Button
-            android:id="@+id/btnSignUp"
+        <!-- Additional Information -->
+        <EditText
+            android:id="@+id/inputNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Register"
-            android:textAllCaps="false"
-            android:textSize="16sp"
+            android:hint="Any additional information.."
             android:padding="14dp"
-            android:backgroundTint="@color/lavender"
-            android:textColor="#FFFFFF" />
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="28dp" />
 
-        <TextView
-            android:id="@+id/loginRedirectText"
-            android:layout_width="wrap_content"
+        <!-- Clear and Generate QR Code Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Already have an account?  Login here"
-            android:textColor="@color/lavender"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_gravity="center"
-            android:paddingTop="25dp"
-            android:paddingBottom="10dp"
-            android:clickable="true"
-            android:focusable="true" />
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="20dp">
 
+            <Button
+                android:id="@+id/btnClear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:padding="14dp"
+                android:visibility="gone"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/gray"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnGenerateQR"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Generate QR Code"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:padding="14dp"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/lavender"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+        <!-- QR Code Preview Section -->
+
+        <LinearLayout
+            android:id="@+id/qrSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:visibility="gone"
+            android:layout_margin="16dp"
+            android:background="@android:color/white">
+
+            <!-- QR Code Image -->
+            <ImageView
+                android:id="@+id/qrCodeImage"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="Generated QR Code"
+                android:layout_marginBottom="20dp" />
+
+            <!-- QR Code ID Box (Light Yellow/Beige) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#FFF8E1"
+                android:padding="12dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/tvQRCodeID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="QR Code ID: 342701330359cda0"
+                    android:textSize="13sp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Details Box (Light Green) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#E8F5E9"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Name: asdda sdfdf"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email: sample123@gmail.com"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Phone: 09562312451"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvPurpose"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Purpose: Meeting"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvHost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Host: sample"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvNotes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notes: dsfsdf"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:id="@+id/tvExpiresAt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Expires at: 2025-11-21 16:02:08"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
