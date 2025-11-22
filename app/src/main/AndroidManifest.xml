@@ -23,7 +23,7 @@
 
         <!-- Launcher should be LoginActivity (exported true) -->
         <activity
-            android:name=".SignUpActivity"
+            android:name=".RegisterVisitor"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +33,9 @@
 
         <activity
             android:name=".DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".VisitorDetailActivity"
             android:exported="false" />
 
     </application>

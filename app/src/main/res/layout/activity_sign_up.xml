@@ -3,245 +3,249 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp"
-    android:background="@drawable/pic">
+    android:background="@drawable/pic"
+    android:padding="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- Back to Dashboard Button (NEW!) -->
+        <Button
+            android:id="@+id/btnBackToDashboard"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="#FF5722"
+            android:drawableStart="@android:drawable/ic_menu_revert"
+            android:drawablePadding="8dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="Back to Dashboard"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:cornerRadius="25dp"
+            app:strokeColor="#FF5722" />
 
         <!-- Title -->
         <TextView
             android:id="@+id/signupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Visitor Registration"
-            android:textSize="22sp"
-            android:textStyle="bold"
             android:paddingBottom="20dp"
-            android:textColor="@color/black" />
+            android:text="Visitor Registration"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <!-- Full Name -->
         <EditText
             android:id="@+id/inputFullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background"
             android:hint="Full Name"
-            android:padding="14dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="18dp" />
+            android:padding="16dp" />
 
         <!-- Email Address -->
         <EditText
             android:id="@+id/inputEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background"
             android:hint="Email Address"
             android:inputType="textEmailAddress"
-            android:padding="14dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="18dp" />
+            android:padding="16dp" />
 
         <!-- Phone Number -->
         <EditText
             android:id="@+id/inputPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background"
             android:hint="Phone Number"
             android:inputType="phone"
-            android:padding="14dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="18dp" />
+            android:padding="16dp" />
 
         <!-- Purpose of Visit -->
         <Spinner
             android:id="@+id/spinnerPurpose"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/edit_text"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:layout_marginBottom="18dp" />
+            android:layout_height="56dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background" />
 
         <!-- Host / Contact Person -->
         <EditText
             android:id="@+id/inputHost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background"
             android:hint="Host / Contact Person"
-            android:padding="14dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="28dp" />
+            android:padding="16dp" />
 
         <!-- Additional Information -->
         <EditText
             android:id="@+id/inputNotes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/edittext_background"
+            android:gravity="top|start"
             android:hint="Any additional information.."
-            android:padding="14dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="28dp" />
+            android:inputType="textMultiLine"
+            android:padding="16dp" />
 
-        <!-- Clear and Generate QR Code Buttons -->
+        <!-- Clear and Generate Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
-            android:layout_marginBottom="20dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnClear"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
+                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
+                android:backgroundTint="#757575"
                 android:text="Clear"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:padding="14dp"
                 android:visibility="gone"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/gray"
-                android:textColor="#FFFFFF" />
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnGenerateQR"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
+                android:layout_marginStart="10dp"
                 android:layout_weight="1"
+                android:backgroundTint="#6C63FF"
                 android:text="Generate QR Code"
                 android:textAllCaps="false"
-                android:textSize="16sp"
-                android:padding="14dp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/lavender"
-                android:textColor="#FFFFFF" />
-
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <!-- QR Code Preview Section -->
-
         <LinearLayout
             android:id="@+id/qrSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="24dp"
-            android:visibility="gone"
             android:layout_margin="16dp"
-            android:background="@android:color/white">
-
-            <!-- QR Code Image -->
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone"> <!-- QR Code Image -->
             <ImageView
                 android:id="@+id/qrCodeImage"
                 android:layout_width="220dp"
                 android:layout_height="220dp"
+                android:layout_marginBottom="20dp"
                 android:background="@android:color/white"
-                android:padding="12dp"
-                android:scaleType="fitCenter"
                 android:contentDescription="Generated QR Code"
-                android:layout_marginBottom="20dp" />
-
-            <!-- QR Code ID Box (Light Yellow/Beige) -->
+                android:padding="12dp"
+                android:scaleType="fitCenter" /> <!-- QR Code ID Box (Light Yellow/Beige) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#FFF8E1"
-                android:padding="12dp"
                 android:layout_marginBottom="20dp"
-                android:gravity="center">
+                android:background="#FFF8E1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
 
                 <TextView
                     android:id="@+id/tvQRCodeID"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="QR Code ID: 342701330359cda0"
-                    android:textSize="13sp"
                     android:textColor="@android:color/black"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <!-- Details Box (Light Green) -->
+            </LinearLayout> <!-- Details Box (Light Green) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:background="#E8F5E9"
+                android:orientation="vertical"
                 android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tvName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
                     android:text="Name: asdda sdfdf"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="6dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
                     android:text="Email: sample123@gmail.com"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="6dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvPhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
                     android:text="Phone: 09562312451"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="6dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvPurpose"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
                     android:text="Purpose: Meeting"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="6dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvHost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
                     android:text="Host: sample"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="6dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvNotes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:text="Notes: dsfsdf"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:layout_marginBottom="10dp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvExpiresAt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Expires at: 2025-11-21 16:02:08"
-                    android:textSize="14sp"
                     android:textColor="@android:color/black"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
-
         </LinearLayout>
 
     </LinearLayout>
-
 </ScrollView>

@@ -5,11 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -21,14 +21,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.uidesign.network.APIBuilder;
 import com.example.uidesign.network.callbacks.APICallbacks;
-import com.example.uidesign.network.endpoints.GenerateQRCode;
 import com.example.uidesign.network.models.RegisterModels;
 import com.example.uidesign.network.repository.UserAPIHandler;
 import com.example.uidesign.network.response.APIResponse;
-import com.example.uidesign.network.response.QrUrlResponse;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -36,11 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class SignUpActivity extends AppCompatActivity {
+public class RegisterVisitor extends AppCompatActivity {
 
 
     // Fields
@@ -51,7 +44,7 @@ public class SignUpActivity extends AppCompatActivity {
     private TextView tvQRCodeID, tvName, tvExpiresAt, tvEmail, tvPhone, tvPurpose, tvHost, tvNotes;
     private Spinner spinnerPurpose;
 
-    private Button btnGenerateQR, btnClear;
+    private Button btnGenerateQR, btnClear,btnBackToDashboard;
     private Context context;
     private Activity activity;
     private UserAPIHandler apiHandler;
@@ -85,6 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
         tvNotes = findViewById(R.id.tvNotes);
         btnClear = findViewById(R.id.btnClear);
         tvExpiresAt = findViewById(R.id.tvExpiresAt);
+        btnBackToDashboard = findViewById(R.id.btnBackToDashboard);
 
         // ==== SPINNER LIST ====
         List<String> purposeList = new ArrayList<>();
@@ -144,7 +138,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
 
                 if (purpose.equals("Select Purpose of Visit")) {
-                    Toast.makeText(SignUpActivity.this, "Please select purpose", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterVisitor.this, "Please select purpose", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -216,6 +210,11 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
             }
+        });
+
+        findViewById(R.id.btnBackToDashboard).setOnClickListener(v -> {
+            startActivity(new Intent(this, DashboardActivity.class));
+            finish(); // optional: close this screen
         });
     }
 }
