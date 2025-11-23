@@ -3,4 +3,4 @@ python-dotenv
 pydantic-settings
 alembic
 sqlmodel
-aiomysql
+

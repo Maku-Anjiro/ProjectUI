@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from fastapi.params import Depends, Query
+from fastapi.params import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import desc
@@ -134,7 +134,6 @@ class VisitorsController:
           await db.commit()
           await db.refresh(visitor)
 
-
           log = Logs(
                   visitor_id=visitor.visitor_id,
                   qr_code=visitor.qr_code,
@@ -191,7 +190,20 @@ class VisitorsController:
      async def get_visitors(db: AsyncSession = Depends(create_session)):
           try:
 
-               query = select(Visitor).order_by(desc(column=Visitor.visitor_id))
+               query = select(
+                       Visitor.visitor_id,
+                       Visitor.full_name,
+                       Visitor.email,
+                       Visitor.purpose,
+                       Visitor.host,
+                       Visitor.qr_code,
+                       Visitor.expiry_at,
+                       Visitor.last_status,
+                       Visitor.last_scan,
+                       Visitor.created_at,
+                       Visitor.phone,
+                       Visitor.notes,
+               ).order_by(desc(column=Visitor.visitor_id))
                result = await db.execute(query)
                visitors = result.mappings().all()
 
@@ -207,7 +219,19 @@ class VisitorsController:
      async def get_pagination_visitors(skip, limit, db: AsyncSession = Depends(create_session)):
           try:
                offset = (skip - 1) * limit
-               query = select(Visitor).limit(limit=limit).offset(offset=offset).order_by(desc(column=Visitor.visitor_id))
+               query = select(Visitor.visitor_id,
+                              Visitor.full_name,
+                              Visitor.email,
+                              Visitor.purpose,
+                              Visitor.host,
+                              Visitor.qr_code,
+                              Visitor.expiry_at,
+                              Visitor.last_status,
+                              Visitor.last_scan,
+                              Visitor.created_at,
+                              Visitor.phone,
+                              Visitor.notes,
+                              ).limit(limit=limit).offset(offset=offset).order_by(desc(column=Visitor.visitor_id))
                result = await db.execute(query)
                visitors = result.mappings().all()
 
@@ -218,4 +242,3 @@ class VisitorsController:
 
           except Exception as e:
                raise HTTPException(status_code=500, detail=str(e))
-
