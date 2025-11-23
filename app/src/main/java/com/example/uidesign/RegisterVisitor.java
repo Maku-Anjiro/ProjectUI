@@ -1,5 +1,7 @@
 package com.example.uidesign;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.uidesign.network.APIBuilder;
 import com.example.uidesign.network.callbacks.APICallbacks;
 import com.example.uidesign.network.models.RegisterModels;
@@ -156,9 +159,6 @@ public class RegisterVisitor extends AppCompatActivity {
                     @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onSuccess(APIResponse response) {
-                        apiHandler.getQrImage(response.getQr_Code(), new APICallbacks<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] response1) {
 
                                 String utcString = "2025-11-21T07:03:00.860336+00:00";
 
@@ -184,24 +184,11 @@ public class RegisterVisitor extends AppCompatActivity {
                                 tvPurpose.setText(response.getPurpose());
                                 tvHost.setText(response.getHost());
                                 tvNotes.setText(response.getNotes());
-
-                                Bitmap bitmap = BitmapFactory.decodeByteArray(response1, 0, response1.length);
-                                runOnUiThread(() -> {
-                                    ImageView qrImageView = findViewById(R.id.qrCodeImage);
-                                    qrImageView.setImageBitmap(bitmap);
-                                });
+                                String qrUrl =  "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+response.getQr_Code();
+                        Glide.with(context).load(qrUrl).into(qrCodeImage);
 
                                 //then set visibility for qr section
                                 qrSection.setVisibility(View.VISIBLE);
-
-                            }
-
-                            @Override
-                            public void onError(Throwable t) {
-
-                            }
-                        });
-
                     }
 
                     @Override
@@ -214,7 +201,7 @@ public class RegisterVisitor extends AppCompatActivity {
 
         findViewById(R.id.btnBackToDashboard).setOnClickListener(v -> {
             startActivity(new Intent(this, DashboardActivity.class));
-            finish(); // optional: close this screen
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
     }
 }

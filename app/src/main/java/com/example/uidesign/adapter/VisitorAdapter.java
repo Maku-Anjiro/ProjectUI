@@ -3,6 +3,7 @@ package com.example.uidesign.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uidesign.R;
 import com.example.uidesign.VisitorDetailActivity;
-import com.example.uidesign.network.models.Visitor;
-
+import com.example.uidesign.network.models.AllVisitors;
 import java.util.List;
 
 public class VisitorAdapter extends RecyclerView.Adapter<VisitorAdapter.ViewHolder> {
-    private List<Visitor> visitors;
+    private List<AllVisitors.Visitor> visitors;
     private Context context;
 
-    public VisitorAdapter(Context context, List<Visitor> visitors) {
+    public VisitorAdapter(Context context, List<AllVisitors.Visitor> visitors) {
         this.context = context;
         this.visitors = visitors;
     }
@@ -37,21 +37,14 @@ public class VisitorAdapter extends RecyclerView.Adapter<VisitorAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Visitor v = visitors.get(position);
-        holder.tvId.setText(v.getId());
-        holder.tvName.setText(v.getVisitorName());
-        holder.tvStatus.setText(v.getStatus());
+        AllVisitors.Visitor v = visitors.get(position);
+        holder.tvId.setText(String.valueOf(v.getVisitor_id()));
+        holder.tvName.setText(v.getFull_name());
+        holder.tvStatus.setText(v.getLast_status());
 
-        // Color status
-//        int color = switch (v.getStatus()) {
-//            case "Valid" -> 0xFF4CAF50;
-//            case "Expired" -> 0xFFFF5722;
-//            case "Pending" -> 0xFFFF9800;
-//            default -> 0xFF9E9E9E;
-//        };
         int color;
 
-        switch (v.getStatus()) {
+        switch (v.getLast_status()) {
             case "Valid":
                 color = 0xFF4CAF50;
                 break;
@@ -78,6 +71,7 @@ public class VisitorAdapter extends RecyclerView.Adapter<VisitorAdapter.ViewHold
 
     @Override
     public int getItemCount() {
+        Log.i("SIZE", String.valueOf(visitors.size()));
         return visitors.size();
     }
 

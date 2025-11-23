@@ -1,24 +1,39 @@
 package com.example.uidesign;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.uidesign.R;
-import com.example.uidesign.adapter.VisitorAdapter;
-import com.example.uidesign.network.models.Visitor;
 
+import com.example.uidesign.adapter.VisitorAdapter;
+import com.example.uidesign.network.callbacks.APICallbacks;
+import com.example.uidesign.network.models.AllVisitors;
+import com.example.uidesign.network.repository.UserAPIHandler;
+import com.google.gson.Gson;
+import com.opencsv.CSVWriter;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,18 +44,24 @@ public class DashboardActivity extends AppCompatActivity {
     private Button btnExport, btnRefresh;
     private RecyclerView recyclerView;
     private VisitorAdapter adapter;
-    private List<Visitor> visitors = new ArrayList<>();
-    private List<Visitor> filteredVisitors = new ArrayList<>();
+    private List<AllVisitors.Visitor> visitor = new ArrayList<>();
+    private AllVisitors visitors;
+    private UserAPIHandler apiHandler;
+    private Context context;
+    private Activity activity;
+    private List<AllVisitors.Visitor> filteredVisitors = new ArrayList<>();
 
     // Firebase database reference
 
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board); // your XML
 
-
+        context = this;
+        activity = this;
 
         // apiBuilder = new APIBuilder(this); // Comment out for mock data
 
@@ -53,24 +74,28 @@ public class DashboardActivity extends AppCompatActivity {
         btnRefresh = findViewById(R.id.btn_refresh);
         recyclerView = findViewById(R.id.recycler_visitors);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        apiHandler = new UserAPIHandler(activity, context);
         adapter = new VisitorAdapter(this, filteredVisitors);
         recyclerView.setAdapter(adapter);
+        visitors = new AllVisitors();
 
-        loadSampleData(); // Use this instead of fetchVisitors()
         updateStats();
         applyFilter("All");
 
         // Search listener
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filterList(s.toString());
             }
+
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         // Filter buttons
@@ -81,14 +106,16 @@ public class DashboardActivity extends AppCompatActivity {
 
         btnRefresh.setOnClickListener(v -> {
             // For mock: Just reload sample
-            loadSampleData();
+            fetchData();
             Toast.makeText(this, "Refreshed", Toast.LENGTH_SHORT).show();
         });
 
-        // TODO: Implement Auto Refresh with Handler or Timer
-        // TODO: Implement Export CSV (use CSVWriter library or manual)
 
-        btnExport.setOnClickListener(v -> Toast.makeText(this, "Export CSV not implemented", Toast.LENGTH_SHORT).show());
+        //export data into csv file
+        btnExport.setOnClickListener(v -> {
+            exportCSV();
+
+        });
 
         // Inside onCreate() after findViewById()
         findViewById(R.id.btnRegisterVisitor).setOnClickListener(v -> {
@@ -99,33 +126,50 @@ public class DashboardActivity extends AppCompatActivity {
         });
     }
 
-    private void loadSampleData() {
-        visitors.clear();
-        // Sample data based on screenshot + current date Nov 22, 2025
-        visitors.add(new Visitor("57", "Jenico Hasild Jidove", "", "Visit to QRgate system", "", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor57", "11/19/2025 11:16", "Expired", "11/19/2025 11:18"));
-        visitors.add(new Visitor("56", "Jenico Hasild Jidove", "", "", "", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor56", "11/19/2025 11:15", "Expired", "11/19/2025 11:15"));
-        visitors.add(new Visitor("54", "Manual Test", "manual@test.com", "", "", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor54", "11/19/2025 19:10", "Expired", "Never"));
-        visitors.add(new Visitor("53", "Auto Test", "auto@test.com", "Meeting", "Host1", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor53", "11/22/2025 10:00", "Valid", "11/22/2025 09:45"));
-        visitors.add(new Visitor("52", "Pending Visitor", "pending@example.com", "Interview", "HR", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor52", "11/23/2025 14:30", "Pending", "Never"));
-        visitors.add(new Visitor("51", "Expired User", "expired@old.com", "Tour", "Guide", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor51", "11/21/2025 16:00", "Expired", "11/21/2025 15:55"));
-        visitors.add(new Visitor("50", "Active Visitor", "active@now.com", "Conference", "Organizer", "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor50", "11/25/2025 18:00", "Valid", "11/22/2025 10:00"));
-        // Add more as needed (total 41 for demo)
-        for (int i = 40; i >= 1; i--) {
-            String status = (i % 3 == 0) ? "Expired" : (i % 2 == 0) ? "Valid" : "Pending";
-            visitors.add(new Visitor(String.valueOf(i), "Visitor " + i, "visitor" + i + "@example.com", "Purpose " + i, "Host " + i, "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Visitor" + i, "11/" + (20 + i % 10) + "/2025 12:00", status, "11/22/2025 11:00"));
-        }
-        filteredVisitors.addAll(visitors);
-        adapter.notifyDataSetChanged();
+    private void fetchData(){
+        visitor.clear();
+        apiHandler.getVisitors(new APICallbacks<AllVisitors>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onSuccess(AllVisitors response) {
+
+                visitor.clear();
+                visitor.addAll(response.getVisitors());
+
+                filteredVisitors.clear();
+                filteredVisitors.addAll(visitor);
+
+                runOnUiThread(() -> {
+                    adapter.notifyDataSetChanged();
+                });
+
+                Gson gson = new Gson();
+                String data = gson.toJson(visitor);
+                Log.i("DATA", data);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+        });
+
     }
 
     private void updateStats() {
-        int total = visitors.size();
+        int total = visitor.size();
         int valid = 0, expired = 0, pending = 0;
-        for (Visitor v : visitors) {
-            switch (v.getStatus()) {
-                case "Valid": valid++; break;
-                case "Expired": expired++; break;
-                case "Pending": pending++; break;
+        for (AllVisitors.Visitor v : visitor) {
+            switch (v.getLast_status()) {
+                case "Valid":
+                    valid++;
+                    break;
+                case "Expired":
+                    expired++;
+                    break;
+                case "Pending":
+                    pending++;
+                    break;
             }
         }
         tvTotal.setText(String.valueOf(total));
@@ -137,10 +181,10 @@ public class DashboardActivity extends AppCompatActivity {
     private void applyFilter(String status) {
         filteredVisitors.clear();
         if ("All".equals(status)) {
-            filteredVisitors.addAll(visitors);
+            filteredVisitors.addAll(visitor);
         } else {
-            for (Visitor v : visitors) {
-                if (status.equals(v.getStatus())) {
+            for (AllVisitors.Visitor v : visitor) {
+                if (status.equals(v.getLast_status())) {
                     filteredVisitors.add(v);
                 }
             }
@@ -150,14 +194,66 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void filterList(String query) {
         filteredVisitors.clear();
-        for (Visitor v : visitors) {
-            if (v.getVisitorName().toLowerCase().contains(query.toLowerCase()) ||
-                    v.getId().contains(query) ||
-                    v.getStatus().toLowerCase().contains(query.toLowerCase())) {
+        for (AllVisitors.Visitor v : visitor) {
+            if (v.getFull_name().toLowerCase().contains(query.toLowerCase()) ||
+                    v.getLast_scan().toLowerCase().contains(query.toLowerCase())) {
                 filteredVisitors.add(v);
             }
         }
         adapter.notifyDataSetChanged();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void exportCSV() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, "visitors_export.csv");
+        values.put(MediaStore.Downloads.MIME_TYPE, "text/csv");
+        values.put(MediaStore.Downloads.IS_PENDING, 1);
+
+        Uri collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        ContentResolver resolver = getContentResolver();
+
+        Uri fileUri = resolver.insert(collection, values);
+
+        if (fileUri == null) {
+            Toast.makeText(this, "Failed to create file", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            OutputStream outputStream = resolver.openOutputStream(fileUri);
+            CSVWriter writer = new CSVWriter(new OutputStreamWriter(outputStream));
+
+            // HEADER ROW
+            writer.writeNext(new String[]{"ID", "Name", "Email", "Phone", "Purpose", "Notes",
+                    "Host", "QR Code", "Last Scan", "Created At", "Expiry At",});
+
+
+            for (AllVisitors.Visitor row : visitor) {
+                writer.writeNext(new String[]{String.valueOf(row.getVisitor_id()), row.getFull_name(),
+                        row.getEmail(), row.getPhone(), row.getPurpose(), row.getPurpose(), row.getNotes(),
+                        row.getHost(), row.getQr_code(), row.getLast_scan(), row.getCreated_at(), row.getExpiry_at()});
+            }
+
+            writer.close();
+
+            // Mark file as done writing
+            values.clear();
+            values.put(MediaStore.Downloads.IS_PENDING, 0);
+            resolver.update(fileUri, values, null, null);
+
+            Toast.makeText(this, "CSV saved in Downloads!", Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchData();
+    }
 }

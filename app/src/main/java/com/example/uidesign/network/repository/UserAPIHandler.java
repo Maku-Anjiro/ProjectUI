@@ -9,7 +9,9 @@ import androidx.annotation.NonNull;
 import com.example.uidesign.network.APIBuilder;
 import com.example.uidesign.network.callbacks.APICallbacks;
 import com.example.uidesign.network.endpoints.GenerateQRCode;
+import com.example.uidesign.network.endpoints.GetAllVisitors;
 import com.example.uidesign.network.endpoints.RegisterUser;
+import com.example.uidesign.network.models.AllVisitors;
 import com.example.uidesign.network.models.RegisterModels;
 import com.example.uidesign.network.response.APIResponse;
 import com.example.uidesign.network.response.QrUrlResponse;
@@ -40,18 +42,7 @@ public class UserAPIHandler {
         call.enqueue(new Callback<APIResponse>() {
             @Override
             public void onResponse(Call<APIResponse> call, Response<APIResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d("API_SUCCESS", "Success: " + response.body().toString());
-                    callback.onSuccess(response.body());
-                } else {
-                    String error = "Error";
-                    try {
-                        error = response.errorBody() != null ? response.errorBody().string() : "No body";
-                    } catch (Exception e) {
-                    }
-                    Log.e("API_ERROR", "Code: " + response.code() + " | " + error);
-                    callback.onError(new Exception("HTTP " + response.code()));
-                }
+                processResponse(response, callback);
             }
 
             @Override
@@ -95,6 +86,37 @@ public class UserAPIHandler {
             }
         });
 
+    }
+
+    public void getVisitors(APICallbacks<AllVisitors> callbacks){
+        GetAllVisitors visitors = api.getRetrofit().create(GetAllVisitors.class);
+        visitors.getAllVisitors().enqueue(new Callback<AllVisitors>() {
+            @Override
+            public void onResponse(Call<AllVisitors> call, Response<AllVisitors> response) {
+                processResponse(response,callbacks);
+            }
+
+            @Override
+            public void onFailure(Call<AllVisitors> call, Throwable t) {
+            callbacks.onError(t);
+            }
+        });
+
+    }
+
+    private <T>  void processResponse(Response<T> response, APICallbacks<T> callback){
+        if (response.isSuccessful() && response.body() != null) {
+            Log.d("API_SUCCESS_FOR_VISITOR", "Success: " + response.body().toString());
+            callback.onSuccess(response.body());
+        } else {
+            String error = "Error";
+            try {
+                error = response.errorBody() != null ? response.errorBody().string() : "No body";
+            } catch (Exception e) {
+            }
+            Log.e("API_ERROR", "Code: " + response.code() + " | " + error);
+            callback.onError(new Exception("HTTP " + response.code()));
+        }
     }
 
 }

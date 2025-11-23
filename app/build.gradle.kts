@@ -43,6 +43,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    //exportting csv file
+    implementation("com.opencsv:opencsv:5.8")
     //For api handling
     implementation("com.squareup.retrofit2:retrofit:2.9.0")  //  3.0.0 doesn't exist
     //for converting the response as json
