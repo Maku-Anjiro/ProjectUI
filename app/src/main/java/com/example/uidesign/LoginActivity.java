@@ -1,0 +1,65 @@
+package com.example.uidesign;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.uidesign.network.callbacks.APICallbacks;
+import com.example.uidesign.network.models.ApiSuccessfulResponse;
+import com.example.uidesign.network.repository.UserAPIHandler;
+
+import java.util.Objects;
+
+public class LoginActivity extends AppCompatActivity {
+
+
+    private final String CLIENT_ID = "737144101830-rfdcp8nj2j1ae7b9qahabs0fca4v3a5m.apps.googleusercontent.com";
+    private UserAPIHandler apiHandler;
+    private Activity activity;
+    private Context context;
+    private Button googleSignInBtn;
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+        googleSignInBtn = findViewById(R.id.google_sign_in_button);
+        activity = this;
+        context = this;
+
+        apiHandler = new UserAPIHandler(activity,context);
+
+
+        googleSignInBtn.setOnClickListener(v ->{
+            Toast.makeText(activity, "Clicked", Toast.LENGTH_SHORT).show();
+            apiHandler.googleLoginResponse(CLIENT_ID, new APICallbacks<ApiSuccessfulResponse>() {
+                @Override
+                public void onSuccess(ApiSuccessfulResponse response) {
+                    Log.i("TEST", response.getAccess_token());
+                    startActivity(new Intent(context, DashboardActivity.class));
+                    finish();
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    Log.i("TEST_ERROR", Objects.requireNonNull(t.getMessage()));
+                    Toast.makeText(activity, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+
+    }
+}

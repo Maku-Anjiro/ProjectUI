@@ -5,8 +5,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AllVisitors implements Serializable{
-
+int  total_visitors,valid_qr_code,expired_qr_code,pending_qr_code;
     List<Visitor> data;
+
+    public int getTotal_visitors() {
+        return total_visitors;
+    }
+
+    public void setTotal_visitors(int total_visitors) {
+        this.total_visitors = total_visitors;
+    }
+
+    public int getValid_qr_code() {
+        return valid_qr_code;
+    }
+
+    public void setValid_qr_code(int valid_qr_code) {
+        this.valid_qr_code = valid_qr_code;
+    }
+
+    public int getExpired_qr_code() {
+        return expired_qr_code;
+    }
+
+    public void setExpired_qr_code(int expired_qr_code) {
+        this.expired_qr_code = expired_qr_code;
+    }
+
+    public int getPending_qr_code() {
+        return pending_qr_code;
+    }
+
+    public void setPending_qr_code(int pending_qr_code) {
+        this.pending_qr_code = pending_qr_code;
+    }
+
+    public List<Visitor> getData() {
+        return data;
+    }
+
+    public void setData(List<Visitor> data) {
+        this.data = data;
+    }
 
     public List<Visitor> getVisitors() {
         return data != null ? data : new ArrayList<Visitor>();

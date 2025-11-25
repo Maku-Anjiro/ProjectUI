@@ -1,15 +1,11 @@
 package com.example.uidesign;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -47,7 +43,7 @@ public class RegisterVisitor extends AppCompatActivity {
     private TextView tvQRCodeID, tvName, tvExpiresAt, tvEmail, tvPhone, tvPurpose, tvHost, tvNotes;
     private Spinner spinnerPurpose;
 
-    private Button btnGenerateQR, btnClear,btnBackToDashboard;
+    private Button btnGenerateQR, btnClear,btnLogin;
     private Context context;
     private Activity activity;
     private UserAPIHandler apiHandler;
@@ -81,7 +77,7 @@ public class RegisterVisitor extends AppCompatActivity {
         tvNotes = findViewById(R.id.tvNotes);
         btnClear = findViewById(R.id.btnClear);
         tvExpiresAt = findViewById(R.id.tvExpiresAt);
-        btnBackToDashboard = findViewById(R.id.btnBackToDashboard);
+        btnLogin = findViewById(R.id.btnLogin);
 
         // ==== SPINNER LIST ====
         List<String> purposeList = new ArrayList<>();
@@ -199,8 +195,8 @@ public class RegisterVisitor extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btnBackToDashboard).setOnClickListener(v -> {
-            startActivity(new Intent(this, DashboardActivity.class));
+        btnLogin.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
     }

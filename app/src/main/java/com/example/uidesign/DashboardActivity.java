@@ -79,7 +79,7 @@ public class DashboardActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         visitors = new AllVisitors();
 
-        updateStats();
+
         applyFilter("All");
 
         // Search listener
@@ -140,7 +140,12 @@ public class DashboardActivity extends AppCompatActivity {
                 filteredVisitors.addAll(visitor);
 
                 runOnUiThread(() -> {
+
                     adapter.notifyDataSetChanged();
+                    tvTotal.setText(String.valueOf(response.getTotal_visitors()));
+                    tvValid.setText(String.valueOf(response.getValid_qr_code()));
+                    tvExpired.setText(String.valueOf(response.getExpired_qr_code()));
+                    tvPending.setText(String.valueOf(response.getPending_qr_code()));
                 });
 
                 Gson gson = new Gson();
@@ -156,27 +161,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     }
 
-    private void updateStats() {
-        int total = visitor.size();
-        int valid = 0, expired = 0, pending = 0;
-        for (AllVisitors.Visitor v : visitor) {
-            switch (v.getLast_status()) {
-                case "Valid":
-                    valid++;
-                    break;
-                case "Expired":
-                    expired++;
-                    break;
-                case "Pending":
-                    pending++;
-                    break;
-            }
-        }
-        tvTotal.setText(String.valueOf(total));
-        tvValid.setText(String.valueOf(valid));
-        tvExpired.setText(String.valueOf(expired));
-        tvPending.setText(String.valueOf(pending));
-    }
+
 
     private void applyFilter(String status) {
         filteredVisitors.clear();
