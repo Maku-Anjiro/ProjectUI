@@ -11,15 +11,16 @@ from sqlmodel import desc
 
 from app.src.database.connection import create_session
 from app.src.database.models import Logs, Visitor
-from app.src.database.models.logs_model import Status
-from app.src.database.models.visitors_model import CreateVisitor
+from app.src.database.models.logs_model import LogStatus
+from app.src.database.models.visitors_model import CreateVisitor, ExpiryStatus
+from app.src.database.repository.user_repositories import UserRepository
 from app.src.validation.validate_fields import *
 
 
 class VisitorsController:
 
      @staticmethod
-     async def register_visitor(register_visitor: CreateVisitor, db: AsyncSession = Depends(create_session)):
+     async def register_visitor(register_visitor: CreateVisitor):
           try:
                # Extract fields
                full_name = register_visitor.full_name
@@ -59,12 +60,9 @@ class VisitorsController:
                        host=register_visitor.host,
                        notes=register_visitor.notes,
                        qr_code=qr_code,
-                       expiry_at=expiry_at,
-               )
+                       expiry_at=expiry_at)
 
-               db.add(visitor)
-               await db.flush()
-               await db.refresh(visitor)
+               await UserRepository.create_visitor(visitor)
 
                return {
                        "ok"          : True,
@@ -85,9 +83,7 @@ class VisitorsController:
 
      @staticmethod
      async def log_exit(
-             qr_code: str,
-             db: AsyncSession = Depends(create_session)
-     ):
+             qr_code: str,):
 
           if not qr_code:
                raise HTTPException(status_code=400, detail="QR code is required")
@@ -95,13 +91,7 @@ class VisitorsController:
           ph_tz = ZoneInfo("Asia/Manila")
           current_time_dt = datetime.now(ph_tz)
           current_time = current_time_dt.strftime("%Y-%m-%d %H:%M:%S")
-
-          # -----------------------------------------
-          # 1. GET VISITOR USING SQLMODEL ORM
-          # -----------------------------------------
-          query = select(Visitor).where(Visitor.qr_code == qr_code)
-          result = await db.execute(query)
-          visitor = result.first()
+          visitor = await UserRepository.find_qr_code(qr_code)
 
           if not visitor:
                raise HTTPException(
@@ -129,19 +119,13 @@ class VisitorsController:
           visitor.exit_time = current_time_dt
           visitor.last_status = "Exited"
           visitor.last_scan = current_time_dt
-
-          db.add(visitor)
-          await db.commit()
-          await db.refresh(visitor)
-
           log = Logs(
                   visitor_id=visitor.visitor_id,
                   qr_code=visitor.qr_code,
-                  status=Status.Valid,
+                  status=LogStatus.Valid,
                   timestamp=current_time_dt,
           )
-          db.add(log)
-          await db.commit()
+          await UserRepository.insert_visitor_log(log)
 
           return {
                   "ok"          : True,
@@ -187,28 +171,20 @@ class VisitorsController:
           return "Less than a minute"
 
      @staticmethod
-     async def get_visitors(db: AsyncSession = Depends(create_session)):
+     async def get_visitors():
           try:
-
-               query = select(
-                       Visitor.visitor_id,
-                       Visitor.full_name,
-                       Visitor.email,
-                       Visitor.purpose,
-                       Visitor.host,
-                       Visitor.qr_code,
-                       Visitor.expiry_at,
-                       Visitor.last_status,
-                       Visitor.last_scan,
-                       Visitor.created_at,
-                       Visitor.phone,
-                       Visitor.notes,
-               ).order_by(desc(column=Visitor.visitor_id))
-               result = await db.execute(query)
-               visitors = result.mappings().all()
+               visitors = await UserRepository.get_visitors()
+               total_visitors = len(visitors)
+               valid_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Valid.value,visitors)))
+               expired_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Expired.value,visitors)))
+               pending_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Pending.value,visitors)))
 
                return {
                        "ok"  : True,
+                       "total_visitors":total_visitors,
+                       "valid_qr_code" : valid_qr_code,
+                       "expired_qr_code" : expired_qr_code,
+                       "pending_qr_code": pending_qr_code,
                        "data": jsonable_encoder(visitors)
                }
 
@@ -216,25 +192,9 @@ class VisitorsController:
                raise HTTPException(status_code=500, detail=str(e))
 
      @staticmethod
-     async def get_pagination_visitors(skip, limit, db: AsyncSession = Depends(create_session)):
+     async def get_pagination_visitors(skip, limit):
           try:
-               offset = (skip - 1) * limit
-               query = select(Visitor.visitor_id,
-                              Visitor.full_name,
-                              Visitor.email,
-                              Visitor.purpose,
-                              Visitor.host,
-                              Visitor.qr_code,
-                              Visitor.expiry_at,
-                              Visitor.last_status,
-                              Visitor.last_scan,
-                              Visitor.created_at,
-                              Visitor.phone,
-                              Visitor.notes,
-                              ).limit(limit=limit).offset(offset=offset).order_by(desc(column=Visitor.visitor_id))
-               result = await db.execute(query)
-               visitors = result.mappings().all()
-
+               visitors = await UserRepository.paginated_visitors(limit, skip)
                return {
                        "ok"  : True,
                        "data": jsonable_encoder(visitors)

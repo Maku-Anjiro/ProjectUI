@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email Address</title>
+  <style>
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #F8FAFC;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+      padding: 50px 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      margin: 12px 0 0;
+      font-size: 17px;
+      opacity: 0.95;
+    }
+
+    .content {
+      padding: 45px 40px;
+      text-align: center;
+      color: #1E293B;
+    }
+
+    .content h2 {
+      font-size: 26px;
+      margin: 0 0 16px 0;
+      color: #0F172A;
+      font-weight: 600;
+    }
+
+    .content p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #475569;
+      margin: 0 0 32px 0;
+    }
+
+    .verify-button {
+      display: inline-block;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      color: #FFFFFF !important;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .verify-button:hover {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .security-note {
+      background-color: #EFF6FF;
+      border-left: 4px solid #3B82F6;
+      padding: 16px 20px;
+      margin: 32px 0;
+      text-align: left;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #1E40AF;
+    }
+
+    .backup-link {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .backup-link p {
+      font-size: 13px;
+      color: #64748B;
+      margin: 0 0 8px 0;
+    }
+
+    .backup-link a {
+      color: #3B82F6;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .footer {
+      background-color: #F1F5F9;
+      padding: 30px 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #64748B;
+      line-height: 1.6;
+    }
+
+    .footer a {
+      color: #3B82F6;
+      text-decoration: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      .email-container { border-radius: 0 !important; }
+      .content { padding: 40px 25px !important; }
+      .header { padding: 40px 20px !important; }
+      .header h1 { font-size: 28px !important; }
+      .verify-button { padding: 14px 30px !important; font-size: 17px !important; }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tr>
+      <td align="center" style="padding: 30px 20px; background-color: #F8FAFC;">
+        <div class="email-container">
+
+          <!-- Header -->
+          <div class="header">
+            <h1>QRGate</h1>
+
+          </div>
+
+          <!-- Main Content -->
+          <div class="content">
+            <h2>Almost there! Verify your email</h2>
+            <p>Thank you for joining QRGate. To complete your registration, please confirm your email address.</p>
+
+            <div class="security-note">
+              <strong>Security tip:</strong> This verification link was sent only to you. Never share it with anyone.
+            </div>
+
+            <!-- Verify Button -->
+            <a href="{{activation_api_link}}" class="verify-button">
+              Verify Email Address
+            </a>
+
+            <p style="margin-top: 32px; color: #64748B;">
+              This link will expire in <strong>24 hours</strong> for security reasons.
+            </p>
+          </div>
+
+
+          <!-- Footer -->
+          <div class="footer">
+            <p><strong>QRGate</strong> © 2025 </p>
+            <p style="margin: 12px 0 0;">
+              This is an automated message. Please do not reply.<br>
+              If you didn’t create an account, you can safely ignore this email.
+            </p>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

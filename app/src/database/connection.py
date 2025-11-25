@@ -12,8 +12,8 @@ LocalSession = async_sessionmaker(
         autoflush=False,
         expire_on_commit=False)
 
-
-async def create_session() -> AsyncGenerator[AsyncSession, None]:
+@asynccontextmanager
+async def create_session() -> AsyncGenerator[AsyncSession, Any]:
      async with LocalSession() as db:
           try:
                yield db
@@ -21,3 +21,5 @@ async def create_session() -> AsyncGenerator[AsyncSession, None]:
           except Exception as e:
                await db.rollback()
                raise e
+
+

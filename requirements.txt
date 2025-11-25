@@ -3,4 +3,7 @@ python-dotenv
 pydantic-settings
 alembic
 sqlmodel
+passlib[argon2]
+python-jose[cryptography]
+fastapi-mail
 
