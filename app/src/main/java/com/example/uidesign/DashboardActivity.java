@@ -14,11 +14,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,6 +31,7 @@ import com.example.uidesign.adapter.VisitorAdapter;
 import com.example.uidesign.network.callbacks.APICallbacks;
 import com.example.uidesign.network.models.AllVisitors;
 import com.example.uidesign.network.repository.UserAPIHandler;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 
@@ -40,6 +43,7 @@ import java.util.List;
 public class DashboardActivity extends AppCompatActivity {
 
     private TextView tvTotal, tvValid, tvExpired, tvPending;
+    private BottomNavigationView bottomNavigation;
     private EditText searchView; // Changed to EditText for Material design
     private Button btnExport, btnRefresh;
     private RecyclerView recyclerView;
@@ -63,8 +67,8 @@ public class DashboardActivity extends AppCompatActivity {
         context = this;
         activity = this;
 
-        // apiBuilder = new APIBuilder(this); // Comment out for mock data
 
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         tvTotal = findViewById(R.id.tv_total);
         tvValid = findViewById(R.id.tv_valid);
         tvExpired = findViewById(R.id.tv_expired);
@@ -80,7 +84,11 @@ public class DashboardActivity extends AppCompatActivity {
         visitors = new AllVisitors();
 
 
+
         applyFilter("All");
+
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Search listener
         searchView.addTextChangedListener(new TextWatcher() {
@@ -116,17 +124,9 @@ public class DashboardActivity extends AppCompatActivity {
             exportCSV();
 
         });
-
-        // Inside onCreate() after findViewById()
-        findViewById(R.id.btnRegisterVisitor).setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, RegisterVisitor.class); // Change to your actual class name
-            startActivity(intent);
-            // Optional smooth transition
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        });
     }
 
-    private void fetchData(){
+    private void fetchData() {
         visitor.clear();
         apiHandler.getVisitors(new APICallbacks<AllVisitors>() {
             @SuppressLint("NotifyDataSetChanged")
@@ -140,7 +140,6 @@ public class DashboardActivity extends AppCompatActivity {
                 filteredVisitors.addAll(visitor);
 
                 runOnUiThread(() -> {
-
                     adapter.notifyDataSetChanged();
                     tvTotal.setText(String.valueOf(response.getTotal_visitors()));
                     tvValid.setText(String.valueOf(response.getValid_qr_code()));
@@ -160,7 +159,6 @@ public class DashboardActivity extends AppCompatActivity {
         });
 
     }
-
 
 
     private void applyFilter(String status) {
@@ -233,6 +231,26 @@ public class DashboardActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    //to setup menu bottom
+    private void setupBottomNavigation() {
+
+        bottomNavigation.setOnItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.nav_profile) {
+                    // Navigate to Profile Activity
+                    Intent intent = new Intent(DashboardActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    return true;
+                }
+
+                return false;
+            }
+        });
     }
 
 
