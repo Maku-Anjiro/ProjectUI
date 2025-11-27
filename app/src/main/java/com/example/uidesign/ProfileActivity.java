@@ -59,6 +59,8 @@ public class ProfileActivity extends AppCompatActivity {
         //show edit profile
         btnEditProfile.setOnClickListener(v -> showEditProfileDialog());
 
+        //Toolbar
+        setupToolbar();
     }
     //Setup toolbar
     private void setupToolbar() {
@@ -73,9 +75,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
     }
-
-
 
 
     private void showEditProfileDialog() {
@@ -107,14 +108,11 @@ public class ProfileActivity extends AppCompatActivity {
         // Cancel button
         btnCancel.setOnClickListener(v -> {
             this.currentPhotoUri = null;
-
             dialog.dismiss();
         });
         // Save button
         btnSave.setOnClickListener(v -> {
             //TODO
-
-
         });
         // Fix 2: Safely show
         if (!isFinishing() && !isDestroyed()) {
