@@ -17,10 +17,5 @@ app.add_middleware(CORSMiddleware,
 app.include_router(visitor_route)
 app.add_exception_handler(exc_class_or_status_code=BaseAppException, handler=app_exception_handler())
 
-
-
-
-
-
 if __name__ == '__main__':
-    uvicorn.run("app.main:app", reload=True, host="0.0.0.0",port=8000)
+     uvicorn.run("app.main:app", reload=True, host="0.0.0.0", port=8000)

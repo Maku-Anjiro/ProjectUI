@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta, timezone
 
+from fastapi import HTTPException, status
 from jose import jwt
 from passlib.context import CryptContext
 
 from app.constants import Constants
 
 constants = Constants()
-class AppSecurity:
 
+
+class AppSecurity:
 
      __context = CryptContext(schemes=['argon2'], deprecated='auto')
 
@@ -38,12 +40,32 @@ class AppSecurity:
           expires = datetime.now(timezone.utc) + timedelta(minutes=1)
 
           if expiration > 0:
-               expires = datetime.now(timezone.utc) + timedelta(expiration)
+               expires = datetime.now(timezone.utc) + timedelta(days=expiration)
 
           # decrypt the data before it encode
-          to_encode = {"data"           : to_encode,
-                       "exp"            : expires}
+          to_encode = {"data": to_encode,
+                       "exp" : expires}
 
           encoded = jwt.encode(to_encode, key=constants.JWT_KEY, algorithm=constants.JWT_ALGORITHM)
           return encoded
 
+     @staticmethod
+     def decode_jwt_token(token: str, verify_exp=True):
+          try:
+               err_message = HTTPException(
+                       status_code=status.HTTP_401_UNAUTHORIZED,
+                       detail={'status': 'failed', 'message': 'Could not validate credentials'},
+                       headers={"WWW-Authenticate": 'Bearer'})
+               if not token:
+                    raise err_message
+               # decode the token
+               payload = jwt.decode(token, key=constants.JWT_KEY, algorithms=[constants.JWT_ALGORITHM],
+                                    options={'verify_exp': verify_exp})
+               if not payload.get('data'):
+                    raise err_message
+
+               # return the data
+
+               return payload
+          except Exception as e:
+               raise e

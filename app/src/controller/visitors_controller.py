@@ -1,20 +1,25 @@
 import secrets
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from zoneinfo import ZoneInfo
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
-from fastapi.params import Depends
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import desc
+from fastapi.params import File
+from starlette.responses import JSONResponse
 
-from app.src.database.connection import create_session
-from app.src.database.models import Logs, Visitor
+from app.constants import Constants
+from app.src.database.models import Logs, Users, Visitor
 from app.src.database.models.logs_model import LogStatus
+from app.src.database.models.users_model import UpdateUser
 from app.src.database.models.visitors_model import CreateVisitor, ExpiryStatus
 from app.src.database.repository.user_repositories import UserRepository
+from app.src.exceptions.app_exception import DataBadRequestException
+from app.src.services.cloudinary_services import CloudinaryServices
+from app.src.utils import GlobalUtils
 from app.src.validation.validate_fields import *
+
+constants = Constants()
 
 
 class VisitorsController:
@@ -83,7 +88,7 @@ class VisitorsController:
 
      @staticmethod
      async def log_exit(
-             qr_code: str,):
+             qr_code: str, ):
 
           if not qr_code:
                raise HTTPException(status_code=400, detail="QR code is required")
@@ -136,56 +141,31 @@ class VisitorsController:
                   "phone"       : visitor.phone,
                   "purpose"     : visitor.purpose,
                   "host"        : visitor.host,
-                  "entry_time"  : VisitorsController.format_time(
+                  "entry_time"  : GlobalUtils.format_time(
                           visitor.created_at.strftime("%Y-%m-%d %H:%M:%S")),
-                  "exit_time"   : VisitorsController.format_time(current_time),
-                  "duration"    : VisitorsController.calculate_duration(
+                  "exit_time"   : GlobalUtils.format_time(current_time),
+                  "duration"    : GlobalUtils.calculate_duration(
                           visitor.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                           current_time,
                   )
           }
 
      @staticmethod
-     def format_time(dt_str: str):
-          dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
-          return dt.strftime("%b %d, %Y %I:%M %p")
-
-     @staticmethod
-     def calculate_duration(start: str, end: str):
-          ph_tz = ZoneInfo("Asia/Manila")
-
-          start_dt = datetime.strptime(start, "%Y-%m-%d %H:%M:%S").replace(tzinfo=ph_tz)
-          end_dt = datetime.strptime(end, "%Y-%m-%d %H:%M:%S").replace(tzinfo=ph_tz)
-
-          diff = end_dt - start_dt
-
-          hours = diff.seconds // 3600
-          minutes = (diff.seconds % 3600) // 60
-
-          if hours > 0:
-               return f"{hours} hour{'s' if hours > 1 else ''} {minutes} minute{'s' if minutes > 1 else ''}"
-
-          if minutes > 0:
-               return f"{minutes} minute{'s' if minutes > 1 else ''}"
-
-          return "Less than a minute"
-
-     @staticmethod
      async def get_visitors():
           try:
                visitors = await UserRepository.get_visitors()
                total_visitors = len(visitors)
-               valid_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Valid.value,visitors)))
-               expired_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Expired.value,visitors)))
-               pending_qr_code = len(list(filter(lambda x : x.last_status == ExpiryStatus.Pending.value,visitors)))
+               valid_qr_code = len(list(filter(lambda x: x.last_status == ExpiryStatus.Valid.value, visitors)))
+               expired_qr_code = len(list(filter(lambda x: x.last_status == ExpiryStatus.Expired.value, visitors)))
+               pending_qr_code = len(list(filter(lambda x: x.last_status == ExpiryStatus.Pending.value, visitors)))
 
                return {
-                       "ok"  : True,
-                       "total_visitors":total_visitors,
-                       "valid_qr_code" : valid_qr_code,
-                       "expired_qr_code" : expired_qr_code,
+                       "ok"             : True,
+                       "total_visitors" : total_visitors,
+                       "valid_qr_code"  : valid_qr_code,
+                       "expired_qr_code": expired_qr_code,
                        "pending_qr_code": pending_qr_code,
-                       "data": jsonable_encoder(visitors)
+                       "data"           : jsonable_encoder(visitors)
                }
 
           except Exception as e:
@@ -202,3 +182,61 @@ class VisitorsController:
 
           except Exception as e:
                raise HTTPException(status_code=500, detail=str(e))
+
+     @classmethod
+     async def update_full_user_information(cls,
+                                            current_user,
+                                            users_info: UpdateUser,
+                                            img_file: Optional[UploadFile] = File(None)):
+          try:
+
+
+               user_obj : Users = current_user.get("Users")
+               current_user_id = user_obj.user_id
+
+               # map the fields into orig data
+               updated_data = user_obj.model_copy(
+                       update=users_info.model_dump(exclude_unset=False, exclude_none=False))
+               if updated_data == current_user_id:
+                    # then return JSONResponse
+                    return JSONResponse(status_code=status.HTTP_200_OK,
+                                        content={'No changes made.'})
+
+               #update user information
+               await UserRepository.update_personal_information(current_user_id,updated_data.model_dump())
+
+               # update user profile
+               profile_image = current_user.get("UserProfile")
+               await cls.__update_user_profile_image(current_user_id,
+                                                     profile_image, img_file)
+
+               return JSONResponse(status_code=status.HTTP_200_OK,
+                                   content={"message": "Successfully updated."})
+          except Exception as e:
+               raise e
+
+     @staticmethod
+     async def __update_user_profile_image(user_id, profile_image, image_file: UploadFile = File(None)):
+          try:
+               current_data = await UserRepository.get_personal_information(user_id)
+
+               if not current_data:
+                    raise DataBadRequestException
+
+               profile_old_profile_picture = profile_image.public_key if \
+                    profile_image else None
+               if GlobalUtils.is_file_uploaded(img_file=image_file):
+                    filename = image_file.filename
+                    if image_file and image_file.size > constants.FILE_SIZE_LIMIT:
+                         raise DataBadRequestException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                                                       message_status="error",
+                                                       message="File too large. Maximum size is 10MB.")
+
+                    profile_image = await CloudinaryServices.update_image_file(user_id,
+                                                                               filename,
+                                                                               profile_old_profile_picture,
+                                                                               image_file.file.read())
+
+                    await UserRepository.update_profile_image(user_id, profile_image)
+          except Exception as e:
+               raise e

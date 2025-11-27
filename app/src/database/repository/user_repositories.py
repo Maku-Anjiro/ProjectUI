@@ -1,9 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlmodel import desc
 
 from app.src.database.connection import create_session
 from app.src.database.models import Logs, Visitor
-from app.src.database.models.users_model import Users
+from app.src.database.models.user_profile_photo_model import UpdateUserProfile, UserProfile
+from app.src.database.models.users_model import UpdateUser, Users
 
 
 class UserRepository:
@@ -100,6 +101,51 @@ class UserRepository:
      async def create_user_account(user: Users):
           async  with create_session() as db:
                try:
+
                     db.add(user)
+                    await db.flush()
+
+                    profile_pic = UserProfile()
+                    profile_pic.user_id = user.user_id
+                    db.add(profile_pic)
+
+               except Exception as e:
+                    raise e
+
+     @staticmethod
+     async def update_profile_image(user_id: str, prof_image: UpdateUserProfile):
+          async with create_session() as db:
+               try:
+                    stmt = update(UserProfile).values(
+                            prof_image,
+                    ).where(UserProfile.user_id == user_id)
+                    await db.execute(stmt)
+                    await db.commit()
+               except Exception as e:
+                    await db.rollback()
+                    raise e
+
+     @staticmethod
+     async def get_personal_information(user_id):
+          async with create_session() as db:
+               try:
+                    stmt = (select(Users, UserProfile)
+                            .outerjoin(UserProfile, Users.user_id == UserProfile.user_id)
+                            .where(
+                            Users.user_id == user_id))
+                    result = await db.execute(stmt)
+                    data = result.mappings().all()
+                    return data
+               except Exception as e:
+                    raise e
+
+     @staticmethod
+     async def update_personal_information(user_id , user_info : UpdateUser):
+          async with create_session() as db:
+
+               try:
+                    stmt = update(Users).where(Users.user_id == user_id).values(**user_info)
+                    await db.execute(stmt)
+
                except Exception as e:
                     raise e

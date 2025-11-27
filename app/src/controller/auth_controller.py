@@ -18,6 +18,8 @@ constants = Constants()
 
 
 class AuthController:
+     __expiration = timedelta(days=7)
+
      @classmethod
      async def create_user_account(cls, user_: CreateUser,
                                    background_task: BackgroundTasks,
@@ -50,7 +52,7 @@ class AuthController:
                # generate access token
                to_encode = {"user_email": new_user.email, "user_id": new_user.id}
 
-               access_token = AppSecurity.generate_access_token(to_encode)
+               access_token = AppSecurity.generate_access_token(to_encode,expiration=7)
                # generate activation link
 
                url_link_for_activation = cls.__generate_activation_link(
@@ -68,8 +70,8 @@ class AuthController:
                # if encountered error, then raise it
                raise e
 
-     @staticmethod
-     async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends(), ):
+     @classmethod
+     async def authenticate_user(cls, form_data: OAuth2PasswordRequestForm = Depends(), ):
           try:
                headers = {'WWW-Authenticate': "Bearer"}
                # retrieve user data first
@@ -88,9 +90,9 @@ class AuthController:
                             detail="Incorrect password.",
                             headers=headers)
 
-               to_encode = {"user_id"   : user_.id,
+               to_encode = {"user_id"   : user_.user_id,
                             'user_email': user_.email}
-               generated_access_token = AppSecurity.generate_access_token(to_encode)
+               generated_access_token = AppSecurity.generate_access_token(to_encode,expiration=7)
 
                # return response
                return JSONResponse(
@@ -105,7 +107,7 @@ class AuthController:
      def __generate_activation_link(email: str, request: Request):
           # generate token that will send to param
           generated_token = AppSecurity.generate_access_token({"user_email": email},
-                                                              expiration=int(timedelta(days=1).total_seconds()))
+                                                              expiration=7)
 
           # API Endpoint where to activate the user account
           base_url = str(request.base_url)
@@ -117,8 +119,8 @@ class AuthController:
 
           return url_link_for_activation
 
-     @staticmethod
-     async def oauth_google_callback(token: str):
+     @classmethod
+     async def oauth_google_callback(cls,token: str):
           try:
                try:
                     # validate google token
@@ -131,7 +133,7 @@ class AuthController:
 
                # get the email
                user_info = user_info.get("data") if user_info.get("data") else user_info
-               print(user_info)
+
                user_email = str(user_info['email']).strip()
                # get the username or fullname
                full_name = f'{user_info.get('given_name')} {user_info.get('family_name')}'
@@ -145,11 +147,13 @@ class AuthController:
                     # generate access token
                     to_encode = {'user_id': new_user.user_id, 'email': new_user.email}
                     # also the refresh token
-                    await UserRepository.create_user_account(new_user)
-                    generated_access_token = AppSecurity.generate_access_token(to_encode)
+
+                    generated_access_token = AppSecurity.generate_access_token(to_encode,expiration=7)
+
+
                     new_user.status = 'activated'  # because when you login as google it will auto activated
                     # update the previous data to encode
-
+                    await UserRepository.create_user_account(new_user)
                     # return the data for the meantime, and will insert it in db later in frontend side
                     return JSONResponse(
                             status_code=status.HTTP_201_CREATED,
@@ -158,16 +162,16 @@ class AuthController:
                                      "access_type": "Bearer"})
 
                # generate access token
-               print(data)
-               # to_encode = {'user_id': data.user_id, 'email': data.email}
+               to_encode = {'user_id': data.user_id, 'email': data.email}
                # also the refresh token
+               generated_access_token = AppSecurity.generate_access_token(to_encode, expiration=7)
+               print(generated_access_token)
 
-               # generated_access_token = AppSecurity.generate_access_token(to_encode)
                # return response
                return JSONResponse(
-                       status_code=status.HTTP_201_CREATED,
+                       status_code=status.HTTP_200_OK,
                        content={"message"     : "Successfully log in.",
-                                "access_token": "generated_access_token",
+                                "access_token": generated_access_token,
                                 "access_type": "Bearer"})
           except Exception as e:
                raise e
