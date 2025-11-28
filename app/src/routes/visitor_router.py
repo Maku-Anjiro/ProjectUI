@@ -1,13 +1,14 @@
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, File, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.params import Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
 from app.src.controller.auth_controller import AuthController
 from app.src.controller.visitors_controller import VisitorsController
-from app.src.core.security import AppSecurity
 from app.src.database.connection import create_session
 from app.src.database.models.users_model import UpdateUser
 from app.src.database.models.visitors_model import CreateVisitor
@@ -42,12 +43,15 @@ async def get_pagination_visitors(skip: int = Query(default=1, ge=1), limit: int
      except Exception as e:
           raise e
 
+
 @visitor_route.post("/login")
-async def visitor_authenticate(form_data : OAuth2PasswordRequestForm = Depends()):
+async def visitor_authenticate(form_data: OAuth2PasswordRequestForm = Depends()):
      try:
           return await AuthController.authenticate_user(form_data)
      except Exception as e:
           raise e
+
+
 @visitor_route.post('/auth/google/callback')
 async def oauth_callback(token=Body()):
      """
@@ -60,18 +64,21 @@ async def oauth_callback(token=Body()):
      except Exception as e:
           raise e
 
+
 @visitor_route.get("/personal/information")
-async def get_personal_information(current_user = Depends(AppDependencies.get_current_user)):
+async def get_personal_information(current_user=Depends(AppDependencies.get_current_user)):
      try:
-          return current_user
+          return JSONResponse(status_code=200, content={"message": "Successfully retrieved data.",
+                                                        "data"   : jsonable_encoder(current_user)})
      except Exception as e:
           raise e
 
+
 @visitor_route.put("/information")
-async def update_user_information(user_info : UpdateUser = Depends(UpdateUser.update_user_info),
-                                  current_user = Depends(AppDependencies.get_current_user),
-                                  img_file : Optional[UploadFile] = File(None)):
+async def update_user_information(user_info: UpdateUser = Depends(UpdateUser.update_user_info),
+                                  current_user=Depends(AppDependencies.get_current_user),
+                                  img_file: Optional[UploadFile] = File(None)):
      try:
-          return await VisitorsController.update_full_user_information(current_user,user_info,img_file)
+          return await VisitorsController.update_full_user_information(current_user, user_info, img_file)
      except Exception as e:
           raise e

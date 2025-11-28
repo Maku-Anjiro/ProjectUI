@@ -190,8 +190,7 @@ class VisitorsController:
                                             img_file: Optional[UploadFile] = File(None)):
           try:
 
-
-               user_obj : Users = current_user.get("Users")
+               user_obj: Users = current_user.get("Users")
                current_user_id = user_obj.user_id
 
                # map the fields into orig data
@@ -202,8 +201,8 @@ class VisitorsController:
                     return JSONResponse(status_code=status.HTTP_200_OK,
                                         content={'No changes made.'})
 
-               #update user information
-               await UserRepository.update_personal_information(current_user_id,updated_data.model_dump())
+               # update user information
+               await UserRepository.update_personal_information(current_user_id, updated_data.model_dump())
 
                # update user profile
                profile_image = current_user.get("UserProfile")

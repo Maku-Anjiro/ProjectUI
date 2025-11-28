@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Body
 from sqlalchemy import Column, func, String, TIMESTAMP
@@ -25,9 +26,9 @@ class CreateUser(BaseUserModel):
      pass
 
 class UpdateUser(SQLModel):
-     full_name: str
-     phone: str
+     full_name: Optional[str] = Field(default=None, sa_column=Column(String(length=100), nullable=False))
+     phone: Optional[str] = Field(default=None, sa_column=Column(String(length=20), nullable=True))
 
      @staticmethod
-     def update_user_info(full_name=Body(None), phone=Body(None)):
+     def update_user_info(full_name : Optional[str]=Body(None), phone : Optional[str]=Body(None)):
           return UpdateUser(full_name=full_name, phone=phone)
