@@ -1,8 +1,10 @@
 package com.example.uidesign;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,7 +47,12 @@ public class LoginActivity extends AppCompatActivity {
             apiHandler.googleLoginResponse(CLIENT_ID, new APICallbacks<ApiSuccessfulResponse>() {
                 @Override
                 public void onSuccess(ApiSuccessfulResponse response) {
-                    Log.i("TEST", response.getAccess_token());
+                    String token = response.getAccess_token();
+                    Log.i("TEST", token);
+                    SharedPreferences preferences = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
+                    @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(Constants.ACCESS_TOKEN,token);
+                    editor.apply();
                     startActivity(new Intent(context, DashboardActivity.class));
                     finish();
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

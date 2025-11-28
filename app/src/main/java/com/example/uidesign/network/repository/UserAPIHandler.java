@@ -23,11 +23,12 @@ import com.example.uidesign.network.endpoints.GenerateQRCode;
 import com.example.uidesign.network.endpoints.GetAllVisitors;
 
 import com.example.uidesign.network.endpoints.GoogleAuthenticateUser;
-import com.example.uidesign.network.endpoints.RegisterUser;
+import com.example.uidesign.network.endpoints.UsersEndpoints;
 import com.example.uidesign.network.models.AllVisitors;
 
 import com.example.uidesign.network.models.ApiSuccessfulResponse;
 import com.example.uidesign.network.models.RegisterModels;
+import com.example.uidesign.network.models.UsersUpdateInformationRequest;
 import com.example.uidesign.network.response.APIResponse;
 
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
@@ -35,7 +36,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -54,7 +54,7 @@ public class UserAPIHandler {
     }
 
     public void registerUser(RegisterModels data, APICallbacks<APIResponse> callback) {
-        RegisterUser apiService = api.getRetrofit().create(RegisterUser.class);
+        UsersEndpoints apiService = api.getRetrofit().create(UsersEndpoints.class);
 
         Call<APIResponse> call = apiService.registerUser(data);
 
@@ -192,6 +192,42 @@ public class UserAPIHandler {
             @Override
             public void onError(Throwable t) {
                 Log.e("ERRO_ON_EMAIL_API", t.getMessage());
+
+            }
+        });
+
+    }
+
+    public void getCurrentUser(String token, APICallbacks<ApiSuccessfulResponse> callbacks){
+        UsersEndpoints usersEndpoints = api.getRetrofit().create(UsersEndpoints.class);
+        usersEndpoints.getCurrentUser("Bearer "+ token).enqueue(new Callback<ApiSuccessfulResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiSuccessfulResponse> call, @NonNull Response<ApiSuccessfulResponse> response) {
+                processResponse(response,callbacks);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiSuccessfulResponse> call, @NonNull Throwable t) {
+                callbacks.onError(t);
+
+            }
+        });
+    }
+
+    public void updateUserInformation(UsersUpdateInformationRequest request, String token, APICallbacks<ApiSuccessfulResponse> callback){
+        UsersEndpoints usersEndpoints = api.getRetrofit().create(UsersEndpoints.class);
+        usersEndpoints.updateInfo(request.getFullnameBody(),
+                request.getImagePart(),
+                request.getEmailBody(),
+                "Bearer "+token).enqueue(new Callback<ApiSuccessfulResponse>() {
+            @Override
+            public void onResponse(Call<ApiSuccessfulResponse> call, Response<ApiSuccessfulResponse> response) {
+                processResponse(response,callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiSuccessfulResponse> call, Throwable t) {
+                callback.onError(t);
 
             }
         });
