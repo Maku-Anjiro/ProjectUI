@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Error • QRGate</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    }
+
+    .error-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(220, 38, 38, 0.15);
+      padding: 60px 40px;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(252, 165, 165, 0.3);
+    }
+
+    .error-container::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(239, 68, 68, 0.08), transparent);
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .error-icon-container { margin-bottom: 30px; position: relative; }
+
+    .error-icon {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: scaleIn 0.7s ease-out;
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+    }
+
+    .error-icon::before {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.25);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .error-icon svg {
+      width: 56px;
+      height: 56px;
+      fill: white;
+      z-index: 2;
+    }
+
+    @keyframes scaleIn {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50%      { transform: scale(1.08); opacity: 0.3; }
+    }
+
+    .error-title {
+      font-size: 34px;
+      color: #7F1D1D;
+      margin-bottom: 16px;
+      font-weight: 700;
+      animation: slideUp 0.8s ease-out 0.2s both;
+    }
+
+    .error-message {
+      font-size: 18px;
+      color: #991B1B;
+      margin-bottom: 32px;
+      line-height: 1.7;
+      animation: slideUp 0.8s ease-out 0.4s both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-details {
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+      border-radius: 14px;
+      padding: 28px;
+      margin: 35px 0;
+      border-left: 6px solid #EF4444;
+      text-align: left;
+      animation: slideUp 0.8s ease-out 0.6s both;
+    }
+
+    .error-details h3 {
+      color: #DC2626;
+      margin-bottom: 16px;
+      font-size: 22px;
+    }
+
+    .error-reasons strong {
+      color: #991B1B;
+      font-size: 16px;
+    }
+
+    .error-reasons ul {
+      margin-top: 12px;
+      padding-left: 20px;
+      color: #7F1D1D;
+    }
+
+    .error-reasons li {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .footer p {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .error-container { padding: 50px 25px; margin: 15px; }
+      .error-title { font-size: 28px; }
+      .error-message { font-size: 16px; }
+      .error-details { padding: 24px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="error-container">
+    <!-- Warning Icon -->
+    <div class="error-icon-container">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Dynamic Error Content -->
+    <div class="error-type active" id="expired">
+      <h1 class="error-title">{{error_response.title}}</h1>
+      <p class="error-message">
+        {{error_response.message}}
+      </p>
+
+      <div class="error-details">
+        <h3>Error Details</h3>
+        <div class="error-reasons">
+          <strong>This happens when:</strong>
+          <ul>
+            {% for reason in error_response.reasons %}
+              <li>{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>QRGate • © 2025</p>
+    </div>
+  </div>
+</body>
+</html>

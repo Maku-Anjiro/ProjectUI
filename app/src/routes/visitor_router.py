@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, File, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Query
 from fastapi.security import OAuth2PasswordRequestForm
@@ -75,10 +75,23 @@ async def get_personal_information(current_user=Depends(AppDependencies.get_curr
 
 
 @visitor_route.put("/information")
-async def update_user_information(user_info: UpdateUser = Depends(UpdateUser.update_user_info),
+async def update_user_information(request: Request,
+                                  background_task: BackgroundTasks,
+                                  email = Body(),
+                                  user_info: UpdateUser = Depends(UpdateUser.update_user_info),
                                   current_user=Depends(AppDependencies.get_current_user),
                                   img_file: Optional[UploadFile] = File(None)):
      try:
-          return await VisitorsController.update_full_user_information(current_user, user_info, img_file)
+          return await VisitorsController.update_full_user_information(current_user, user_info,
+                                                                       email, request,
+                                                                       background_task,
+                                                                       img_file)
+     except Exception as e:
+          raise e
+
+@visitor_route.get("/email")
+async def update_email(token, request : Request):
+     try:
+          return await VisitorsController.update_email(token, request)
      except Exception as e:
           raise e

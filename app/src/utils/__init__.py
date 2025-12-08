@@ -69,3 +69,10 @@ class GlobalUtils:
                          raise e
 
           return is_file_upload
+
+     @staticmethod
+     def format_created_at(dt: datetime) -> str:
+          if not dt:
+               return None
+
+          return dt.strftime("%A, %B %d, %Y")

@@ -12,7 +12,6 @@ class BaseUserModel(SQLModel):
      full_name: str = Field(default=None, sa_column=Column(String(length=100), nullable=False))
      email: str = Field(default=None, sa_column=Column(String(length=100), nullable=False, index=True))
      phone: str = Field(default=None, sa_column=Column(String(length=20), nullable=True))
-
      status: str = Field(default="pending")
 
 class Users(BaseUserModel, table=True):

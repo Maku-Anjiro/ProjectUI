@@ -22,13 +22,11 @@ class AuthController:
 
      @classmethod
      async def create_user_account(cls, user_: CreateUser,
-                                   background_task: BackgroundTasks,
                                    request: Request):
           """
           To create a user account. Create first, before create its personal information.
           :param request:
           :param user_: that contains the credentials of a user to be insert in database.
-          :param background_task: to send email without delaying the process of sending email.
           :return: JSONResponse
           """
           try:
@@ -150,7 +148,6 @@ class AuthController:
 
                     generated_access_token = AppSecurity.generate_access_token(to_encode,expiration=7)
 
-
                     new_user.status = 'activated'  # because when you login as google it will auto activated
                     # update the previous data to encode
                     await UserRepository.create_user_account(new_user)
@@ -165,7 +162,6 @@ class AuthController:
                to_encode = {'user_id': data.user_id, 'email': data.email}
                # also the refresh token
                generated_access_token = AppSecurity.generate_access_token(to_encode, expiration=7)
-               print(generated_access_token)
 
                # return response
                return JSONResponse(
@@ -175,3 +171,5 @@ class AuthController:
                                 "access_type": "Bearer"})
           except Exception as e:
                raise e
+
+

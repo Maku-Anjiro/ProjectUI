@@ -1,12 +1,15 @@
+from fastapi import Request
 from sqlalchemy import select, update
 from sqlmodel import desc
 
+from app.constants import Constants
+from app.src.core.security import AppSecurity
 from app.src.database.connection import create_session
 from app.src.database.models import Logs, Visitor
 from app.src.database.models.user_profile_photo_model import UpdateUserProfile, UserProfile
 from app.src.database.models.users_model import UpdateUser, Users
 
-
+constants = Constants()
 class UserRepository:
 
      @staticmethod
@@ -19,7 +22,6 @@ class UserRepository:
                     return data
                except Exception as e:
                     raise e
-
 
      @staticmethod
      async def get_visitors():
@@ -81,7 +83,7 @@ class UserRepository:
                     raise e
 
      @staticmethod
-     async def insert_visitor_log(logs : Logs):
+     async def insert_visitor_log(logs: Logs):
           async  with create_session() as db:
                try:
                     db.add(logs)
@@ -130,8 +132,8 @@ class UserRepository:
           async with create_session() as db:
                try:
                     stmt = (select(Users, UserProfile)
-                            .outerjoin(UserProfile, Users.user_id == UserProfile.user_id)
-                            .where(
+                    .outerjoin(UserProfile, Users.user_id == UserProfile.user_id)
+                    .where(
                             Users.user_id == user_id))
                     result = await db.execute(stmt)
                     data = result.mappings().all()
@@ -140,7 +142,7 @@ class UserRepository:
                     raise e
 
      @staticmethod
-     async def update_personal_information(user_id , user_info : UpdateUser):
+     async def update_personal_information(user_id, user_info: UpdateUser):
           async with create_session() as db:
 
                try:
@@ -148,4 +150,15 @@ class UserRepository:
                     await db.execute(stmt)
 
                except Exception as e:
+                    raise e
+     @staticmethod
+     async def update_user_email(current_email, new_email):
+          async with create_session() as db:
+               try:
+                    stmt = update(Users).where(Users.email == current_email).values(email = new_email)
+                    await db.execute(stmt)
+                    await db.commit()
+
+               except Exception as e:
+                    await db.rollback()
                     raise e
