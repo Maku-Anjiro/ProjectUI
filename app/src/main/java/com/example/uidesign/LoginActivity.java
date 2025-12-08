@@ -39,24 +39,29 @@ public class LoginActivity extends AppCompatActivity {
         activity = this;
         context = this;
 
-        apiHandler = new UserAPIHandler(activity,context);
+        apiHandler = new UserAPIHandler(activity, context);
+
+        SharedPreferences preferences = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
+        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
+
+        Log.i("ACCES_TOKEN", preferences.getString(Constants.ACCESS_TOKEN, ""));
 
 
-        googleSignInBtn.setOnClickListener(v ->{
-            Toast.makeText(activity, "Clicked", Toast.LENGTH_SHORT).show();
+        googleSignInBtn.setOnClickListener(v -> {
             apiHandler.googleLoginResponse(CLIENT_ID, new APICallbacks<ApiSuccessfulResponse>() {
                 @Override
                 public void onSuccess(ApiSuccessfulResponse response) {
                     String token = response.getAccess_token();
-                    Log.i("TEST", token);
+                    Log.i("ACCES_TOKEN", token);
                     SharedPreferences preferences = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
                     @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(Constants.ACCESS_TOKEN,token);
+                    editor.putString(Constants.ACCESS_TOKEN, token);
                     editor.apply();
                     startActivity(new Intent(context, DashboardActivity.class));
                     finish();
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
                 }
 
                 @Override

@@ -1,5 +1,7 @@
 package com.example.uidesign;
 
+import static android.view.View.GONE;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -43,7 +45,7 @@ public class RegisterVisitor extends AppCompatActivity {
     private TextView tvQRCodeID, tvName, tvExpiresAt, tvEmail, tvPhone, tvPurpose, tvHost, tvNotes;
     private Spinner spinnerPurpose;
 
-    private Button btnGenerateQR, btnClear,btnLogin;
+    private Button btnGenerateQR, btnClear, btnLogin;
     private Context context;
     private Activity activity;
     private UserAPIHandler apiHandler;
@@ -156,35 +158,35 @@ public class RegisterVisitor extends AppCompatActivity {
                     @Override
                     public void onSuccess(APIResponse response) {
 
-                                String utcString = "2025-11-21T07:03:00.860336+00:00";
+                        String utcString = "2025-11-21T07:03:00.860336+00:00";
 
-                                // Parse UTC string
-                                OffsetDateTime utcDateTime = OffsetDateTime.parse(utcString);
+                        // Parse UTC string
+                        OffsetDateTime utcDateTime = OffsetDateTime.parse(utcString);
 
-                                // Convert to Philippine Time (UTC+8)
-                                ZoneId philippineZone = ZoneId.of("Asia/Manila");
-                                var phTime = utcDateTime.atZoneSameInstant(philippineZone);
+                        // Convert to Philippine Time (UTC+8)
+                        ZoneId philippineZone = ZoneId.of("Asia/Manila");
+                        var phTime = utcDateTime.atZoneSameInstant(philippineZone);
 
-                                // Format output
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        // Format output
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-                                String formatted = phTime.format(formatter);
+                        String formatted = phTime.format(formatter);
 
-                                btnClear.setVisibility(View.VISIBLE);
-                                //set text for expiration with formatted date and time
-                                tvExpiresAt.setText(formatted);
-                                tvQRCodeID.setText(response.getQr_Code());
-                                tvName.setText(response.getVisitor_name());
-                                tvEmail.setText(response.getEmail());
-                                tvPhone.setText(response.getPhone());
-                                tvPurpose.setText(response.getPurpose());
-                                tvHost.setText(response.getHost());
-                                tvNotes.setText(response.getNotes());
-                                String qrUrl =  "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+response.getQr_Code();
+                        btnClear.setVisibility(View.VISIBLE);
+                        //set text for expiration with formatted date and time
+                        tvExpiresAt.setText(formatted);
+                        tvQRCodeID.setText(response.getQr_Code());
+                        tvName.setText(response.getVisitor_name());
+                        tvEmail.setText(response.getEmail());
+                        tvPhone.setText(response.getPhone());
+                        tvPurpose.setText(response.getPurpose());
+                        tvHost.setText(response.getHost());
+                        tvNotes.setText(response.getNotes());
+                        String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + response.getQr_Code();
                         Glide.with(context).load(qrUrl).into(qrCodeImage);
 
-                                //then set visibility for qr section
-                                qrSection.setVisibility(View.VISIBLE);
+                        //then set visibility for qr section
+                        qrSection.setVisibility(View.VISIBLE);
                     }
 
                     @Override
@@ -194,6 +196,11 @@ public class RegisterVisitor extends AppCompatActivity {
                 });
             }
         });
+        btnClear.setOnClickListener(v -> {
+            qrSection.setVisibility(GONE);
+            btnClear.setVisibility(GONE);
+        });
+
 
         btnLogin.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));

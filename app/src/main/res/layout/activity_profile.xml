@@ -130,7 +130,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Personal Information"
+                        android:text="Account"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#1A1A1A"
@@ -241,42 +241,12 @@
                         </LinearLayout>
                     </LinearLayout>
 
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Account Actions Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Account"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1A1A"
-                        android:layout_marginBottom="16dp"/>
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#E5E7EB"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="4dp"/>
-
                     <!-- Logout -->
                     <LinearLayout
                         android:id="@+id/btn_logout"
@@ -306,13 +276,6 @@
                             android:textColor="#DC2626"
                             android:textStyle="bold"
                             android:layout_marginStart="16dp"/>
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_chevron_right"
-                            android:contentDescription="Navigate"
-                            app:tint="#DC2626"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

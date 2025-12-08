@@ -113,7 +113,6 @@ public class DashboardActivity extends AppCompatActivity {
         findViewById(R.id.btn_pending).setOnClickListener(v -> applyFilter("Pending"));
 
         btnRefresh.setOnClickListener(v -> {
-            // For mock: Just reload sample
             fetchData();
             Toast.makeText(this, "Refreshed", Toast.LENGTH_SHORT).show();
         });
@@ -149,7 +148,6 @@ public class DashboardActivity extends AppCompatActivity {
 
                 Gson gson = new Gson();
                 String data = gson.toJson(visitor);
-                Log.i("DATA", data);
             }
 
             @Override

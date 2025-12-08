@@ -71,7 +71,6 @@ public class VisitorAdapter extends RecyclerView.Adapter<VisitorAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        Log.i("SIZE", String.valueOf(visitors.size()));
         return visitors.size();
     }
 

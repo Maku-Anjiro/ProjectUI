@@ -35,6 +35,7 @@ public interface UsersEndpoints {
     Call<ApiSuccessfulResponse> updateInfo(@Part("full_name") RequestBody fullname,
                                            @Part MultipartBody.Part img_file,
                                            @Part("phone") RequestBody phoneNumber,
+                                           @Part("email") RequestBody email,
                                            @Header("Authorization") String token);
 
 }

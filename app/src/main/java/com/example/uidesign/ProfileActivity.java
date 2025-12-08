@@ -70,6 +70,10 @@ public class ProfileActivity extends AppCompatActivity {
         //show edit profile
         btnEditProfile.setOnClickListener(v -> showEditProfileDialog());
 
+        toolbar.setOnClickListener(v -> {
+            onBackPressed();
+        });
+
 
     }
 
@@ -113,10 +117,12 @@ public class ProfileActivity extends AppCompatActivity {
                 }
         );
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
+
     private void showEditProfileDialog() {
         Gson gson = new Gson();
         // Create dialog
@@ -142,7 +148,7 @@ public class ProfileActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
 
         String data = preferences.getString(Constants.USERS_DATA_KEY, "");
-        Log.i("USER_DATA", data);
+
         String token = preferences.getString(Constants.ACCESS_TOKEN, "");
 
         if (!data.isEmpty()) {
@@ -172,9 +178,7 @@ public class ProfileActivity extends AppCompatActivity {
             String fullname = Objects.requireNonNull(etEditName.getText()).toString();
             String phone = Objects.requireNonNull(etEditPhone.getText()).toString();
             String email = Objects.requireNonNull(etEditEmail.getText()).toString();
-            Log.i("FULLNAME_PROF", fullname);
-            Log.i("phone_PROF", phone);
-            Log.i("email_PROF", email);
+
             //convert URI to File
             File imageFile = null;
             if (currentPhotoUri != null) {
@@ -185,27 +189,27 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
 
-            UsersUpdateInformationRequest request = new UsersUpdateInformationRequest(imageFile,fullname,email,phone);
+            UsersUpdateInformationRequest request = new UsersUpdateInformationRequest(imageFile, fullname, email, phone);
 
-        apiHandler.updateUserInformation(request, token, new APICallbacks<ApiSuccessfulResponse>() {
-            @Override
-            public void onSuccess(ApiSuccessfulResponse response) {
-                SharedPreferences.Editor editor = preferences.edit();
-                String data = gson.toJson(response);
-                editor.putString(data, "");
-                editor.apply();
-                Toast.makeText(ProfileActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
+            apiHandler.updateUserInformation(request, token, new APICallbacks<ApiSuccessfulResponse>() {
+                @Override
+                public void onSuccess(ApiSuccessfulResponse response) {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    String data = gson.toJson(response);
+                    editor.putString(data, "");
+                    editor.apply();
+                    Toast.makeText(ProfileActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
 
-                setCurrentUserData();
+                    setCurrentUserData();
 
-                dialog.dismiss();
-            }
+                    dialog.dismiss();
+                }
 
-            @Override
-            public void onError(Throwable t) {
+                @Override
+                public void onError(Throwable t) {
 
-            }
-        });
+                }
+            });
         });
         //
         if (!isFinishing() && !isDestroyed()) {
@@ -233,12 +237,10 @@ public class ProfileActivity extends AppCompatActivity {
         editor.clear();
         editor.apply();
         Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-        intent.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
     }
-
-
 
 
     private void checkPermissionAndPickImage() {

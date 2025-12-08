@@ -133,8 +133,6 @@ public class UserAPIHandler {
        GetCredentialRequest request = new  GetCredentialRequest.Builder()
                 .addCredentialOption(googleIdOption)
                 .build();
-        Toast.makeText(activity, "Start", Toast.LENGTH_SHORT).show();
-
         handleSignIn(request,callback);
     }
 
@@ -218,6 +216,7 @@ public class UserAPIHandler {
         UsersEndpoints usersEndpoints = api.getRetrofit().create(UsersEndpoints.class);
         usersEndpoints.updateInfo(request.getFullnameBody(),
                 request.getImagePart(),
+                request.getContactNumberBody(),
                 request.getEmailBody(),
                 "Bearer "+token).enqueue(new Callback<ApiSuccessfulResponse>() {
             @Override
